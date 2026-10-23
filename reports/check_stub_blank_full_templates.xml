@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Same as l10n_us_check_printing.ckus_stub_blank (company name + sequence number),
+       plus the invoice table that l10n_us_check_printing.ckus_stub (the non-blank stub)
+       already has: page['stub_lines'] is built by the same Python method either way,
+       the native blank template just never draws it. -->
+  <template id="ckus_stub_blank_full" name="Darakjian Blank Check Stub (with invoice table)">
+    <div t-attf-class="ckus_stub_blank ckus_stub_blank_{{ stub_num }}">
+      <div class="ckus_name" t-out="page['company_name']"/>
+      <div class="ckus_number sequence_number" t-if="page['sequence_number']" t-out="page['sequence_number']"/>
+
+      <table class="table table-bordered table-sm stub_lines" t-if="page['stub_lines']">
+        <thead>
+          <tr>
+            <th class="text-start">Due Date</th>
+            <th class="text-start">Description</th>
+            <th class="text-end">Invoice Amount</th>
+            <th class="text-end">Balance Due</th>
+            <th class="text-end">Payment</th>
+          </tr>
+        </thead>
+        <tbody>
+          <t t-foreach="page['stub_lines']" t-as="stub_line">
+            <t t-if="stub_line.get('header')">
+              <tr><th colspan="6"><t t-out="stub_line['name']"/></th></tr>
+            </t>
+            <t t-if="not stub_line.get('header')">
+              <tr>
+                <td class="text-start"><t t-if="stub_line['due_date']" t-out="stub_line['due_date']"/></td>
+                <td class="text-start text-truncate" style="max-width: 500px;"><t t-out="stub_line['number']"/></td>
+                <td class="text-end"><t t-out="stub_line['amount_total']"/></td>
+                <td class="text-end"><t t-out="stub_line['amount_residual']"/></td>
+                <td class="text-end"><t t-out="stub_line['amount_paid']"/></td>
+              </tr>
+            </t>
+          </t>
+          <tr t-if="page['stub_cropped']"><td colspan="6" class="text-end">...</td></tr>
+        </tbody>
+      </table>
+      <div class="stub_total_amount" t-if="page['stub_lines']">Check Amount:
+        <span class="text-nowrap"><t t-out="page['amount']"/></span>
+      </div>
+    </div>
+  </template>
+
+  <!-- Same page loop as l10n_us_check_printing.print_blank_check_bottom, just calling the
+       stub template above instead of the native one. ckus_check_blank (the check face
+       itself: bank name, MICR, signature line) is reused as-is, untouched. -->
+  <template id="print_blank_check_bottom_full" name="Darakjian Blank Check (Bottom) with Invoice Stub">
+    <t t-call="web.html_container">
+      <t t-foreach="docs" t-as="o">
+        <div t-att-data-oe-model="o._name" t-att-data-oe-id="o.id"
+             t-foreach="o._check_get_pages()" t-as="page"
+             class="page article ckus_page ckus_bottom_page"
+             t-attf-style="top: {{ o.company_id.account_check_printing_margin_top }}in; left: {{ o.company_id.account_check_printing_margin_left }}in;">
+          <t t-call="yaguven_darakjian_check_printing.ckus_stub_blank_full"><t t-set="stub_num" t-value="1"/></t>
+          <t t-call="yaguven_darakjian_check_printing.ckus_stub_blank_full"><t t-set="stub_num" t-value="2"/></t>
+          <t t-call="l10n_us_check_printing.ckus_check_blank"/>
+        </div>
+      </t>
+    </t>
+  </template>
+
+</odoo>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!--
+    Mirrors l10n_us_check_printing's own "Print Blank Check (Bottom)" action record
+    (same model, paperformat, report_type, binding_type) so it slots into the exact
+    same Check Layout selector in Settings. binding_model_id is left empty on
+    purpose, same as the native ones, so this does not also clutter the generic
+    Print dropdown on the payment form with a duplicate entry.
+  -->
+  <record id="action_print_blank_check_bottom_full" model="ir.actions.report">
+    <field name="name">Print Blank Check (Bottom) + Invoice Stub - Darakjian</field>
+    <field name="model">account.payment</field>
+    <field name="report_type">qweb-pdf</field>
+    <field name="report_name">yaguven_darakjian_check_printing.print_blank_check_bottom_full</field>
+    <field name="report_file">yaguven_darakjian_check_printing.print_blank_check_bottom_full</field>
+    <field name="paperformat_id" ref="l10n_us_check_printing.paperformat_check_us"/>
+    <field name="print_report_name">'Blank Check Bottom - %s' % (object.partner_id.name or '',)</field>
+    <field name="binding_type">report</field>
+  </record>
+
+</odoo>
